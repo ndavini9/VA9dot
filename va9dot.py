@@ -1,101 +1,152 @@
-import argparse
+import logging
+import time
 
-from core.config import Config
-from core.httpclient import HttpClient
-from core.engine import Engine
 from core.plugin_loader import PluginLoader
-from core.report import ReportGenerator
+from core.engine import Engine
 
 
-parser = argparse.ArgumentParser()
+# ============================================================
+# Logging configuration
+# ============================================================
 
-
-parser.add_argument(
-    "--host",
-    required=True
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(message)s",
+    datefmt="%H:%M:%S"
 )
 
-
-parser.add_argument(
-    "--user",
-    required=True
-)
+logger = logging.getLogger(__name__)
 
 
-parser.add_argument(
-    "--password",
-    required=True
-)
+# ============================================================
+# Main
+# ============================================================
+
+def main():
+
+    logger.info("=" * 60)
+    logger.info("Starting VA9dot")
+    logger.info("=" * 60)
 
 
-args = parser.parse_args()
+    start_time = time.time()
 
 
+    # --------------------------------------------------------
+    # Load plugins
+    # --------------------------------------------------------
 
-cfg = Config()
+    loader = PluginLoader()
 
-client = HttpClient(
-    protocol=cfg.protocol,
-    host=cfg.host,
-    port=cfg.port,
-    username=cfg.username,
-    password=cfg.password,
-    timeout=cfg.timeout,
-    verify_ssl=cfg.verify_ssl
-)
+    tests = loader.load()
 
 
-
-engine = Engine(client)
-
-
-
-loader = PluginLoader()
-
-
-tests = loader.load()
-
-
-
-for test in tests:
-
-    engine.add_test(test)
-
-
-
-results = engine.run()
-
-
-
-for result in results:
-
-    result.status = (
-        "PASS"
-        if result.passed
-        else
-        "FAIL"
-    )
-
-    print(
-        f"[{result.status}] "
-        f"{result.id} "
-        f"{result.message}"
+    logger.info(
+        "Tests loaded: %s",
+        len(tests)
     )
 
 
+    if not tests:
 
-report = ReportGenerator()
+        logger.warning(
+            "No tests available"
+        )
+
+        return
 
 
-filename = report.generate(
-    results
-)
+    # --------------------------------------------------------
+    # Execute scan
+    # --------------------------------------------------------
+
+    engine = Engine(
+        tests
+    )
 
 
-print()
+    results = engine.run()
 
-print(
-    "Report generated:"
-)
 
-print(filename)
+    # --------------------------------------------------------
+    # Results
+    # --------------------------------------------------------
+
+    logger.info("=" * 60)
+    logger.info("Scan results")
+    logger.info("=" * 60)
+
+
+    for result in results:
+
+
+        logger.info(
+            "%s | %s | %s | %s",
+            result.test_id,
+            result.status,
+            result.severity,
+            result.message
+        )
+
+
+        if result.evidence:
+
+            logger.info(
+                "Evidence: %s",
+                result.evidence
+            )
+
+
+    # --------------------------------------------------------
+    # Summary
+    # --------------------------------------------------------
+
+    elapsed = (
+        time.time()
+        - start_time
+    )
+
+
+    passed = len(
+        [
+            r for r in results
+            if r.status == "PASS"
+        ]
+    )
+
+    failed = len(
+        [
+            r for r in results
+            if r.status == "FAIL"
+        ]
+    )
+
+    errors = len(
+        [
+            r for r in results
+            if r.status == "ERROR"
+        ]
+    )
+
+
+    logger.info("=" * 60)
+
+    logger.info(
+        "Summary: PASS=%s FAIL=%s ERROR=%s",
+        passed,
+        failed,
+        errors
+    )
+
+    logger.info(
+        "Completed in %.2f seconds",
+        elapsed
+    )
+
+    logger.info("=" * 60)
+
+
+
+if __name__ == "__main__":
+
+    main()
