@@ -69,7 +69,7 @@ results = engine.run()
 
 for result in results:
 
-    status = (
+    result.status = (
         "PASS"
         if result.passed
         else
@@ -77,7 +77,7 @@ for result in results:
     )
 
     print(
-        f"[{status}] "
+        f"[{result.status}] "
         f"{result.id} "
         f"{result.message}"
     )
