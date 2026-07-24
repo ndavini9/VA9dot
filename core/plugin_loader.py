@@ -1,8 +1,12 @@
 import os
 import importlib
 import inspect
+import logging
 
 from core.testcase import TestCase
+
+
+logger = logging.getLogger(__name__)
 
 
 class PluginLoader:
@@ -17,22 +21,16 @@ class PluginLoader:
 
         tests = []
 
-        base_path = os.path.abspath(
-            self.directory
-        )
+        if not os.path.exists(self.directory):
 
-        print("Plugin directory:")
-        print(base_path)
-
-
-        if not os.path.exists(base_path):
-
-            print("Plugin directory not found")
+            logger.error(
+                "Plugin directory missing"
+            )
 
             return tests
 
 
-        for file in os.listdir(base_path):
+        for file in os.listdir(self.directory):
 
             if not file.endswith(".py"):
                 continue
@@ -46,39 +44,40 @@ class PluginLoader:
             )
 
 
-            print(
-                "Loading plugin:",
-                module_name
-            )
+            try:
+
+                module = importlib.import_module(
+                    module_name
+                )
 
 
-            module = importlib.import_module(
-                module_name
-            )
-
-
-            for _, obj in inspect.getmembers(
-                module,
-                inspect.isclass
-            ):
-
-                if (
-                    issubclass(obj, TestCase)
-                    and obj != TestCase
+                for _, obj in inspect.getmembers(
+                    module,
+                    inspect.isclass
                 ):
 
-                    print(
-                        "Test found:",
-                        obj.id
-                    )
 
-                    tests.append(obj())
+                    if (
+                        issubclass(obj, TestCase)
+                        and obj != TestCase
+                    ):
+
+                        instance = obj()
+
+                        instance.validate()
+
+                        tests.append(
+                            instance
+                        )
 
 
-        print(
-            "Plugins loaded:",
-            len(tests)
-        )
+            except Exception as e:
+
+                logger.error(
+                    "%s failed: %s",
+                    module_name,
+                    e
+                )
 
 
         return tests
