@@ -42,39 +42,26 @@ class DiscoveryTest(TestCase):
             )
 
 
-            return TestResult(
+          return TestResult(
 
-                test_id=self.id,
+    test_id=self.id,
 
-                name=self.name,
+    name=self.name,
 
-                status=status,
+    status="ERROR",
 
-                severity=self.severity,
+    severity="INFO",
 
-                category=self.category,
+    category=self.category,
 
-                duration_ms=result["duration_ms"],
+    message=str(ex),
 
-                message=(
-                    f"HTTP {response.status_code}"
-                ),
+    recommendation=(
+        "Check network connectivity "
+        "and HTTP service availability."
+    )
 
-                evidence={
-                    "status_code": response.status_code
-                },
-
-                request=str(
-                    result["request"]
-                ),
-
-                response=str(
-                    dict(response.headers)
-                ),
-
-                recommendation=self.recommendation
-
-            )
+)
 
 
         except Exception as ex:
