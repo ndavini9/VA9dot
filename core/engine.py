@@ -1,76 +1,183 @@
 import time
 
 from core.logger import Logger
-from core.result import TestResult
+from core.plugin_loader import PluginLoader
+from core.engine import Engine
+from core.http_client import HttpClient
 
 
-class Engine:
+logger = Logger.get()
 
-    def __init__(self, client):
 
-        self.client = client
-        self.tests = []
-        self.logger = Logger.get()
+def main():
 
-    def add_test(self, test):
+    logger.info("=" * 60)
+    logger.info("Starting VA9dot")
+    logger.info("=" * 60)
 
-        self.tests.append(test)
 
-    def run(self):
+    scan_start = time.perf_counter()
 
-        results = []
 
-        total = len(self.tests)
+    # ---------------------------------------------------------
+    # Configuration
+    # ---------------------------------------------------------
 
-        self.logger.info("=" * 60)
-        self.logger.info("Starting scan")
-        self.logger.info("Tests loaded: %d", total)
-        self.logger.info("=" * 60)
+    protocol = "http"
+    host = "192.168.1.1"
+    port = 80
 
-        scan_start = time.perf_counter()
+    username = None
+    password = None
 
-        for index, test in enumerate(self.tests, start=1):
 
-            self.logger.info(
-                "[%d/%d] Executing %s",
-                index,
-                total,
-                test.id
-            )
+    # ---------------------------------------------------------
+    # Create HTTP client
+    # ---------------------------------------------------------
 
-            start = time.perf_counter()
+    client = HttpClient(
 
-            try:
+        protocol=protocol,
 
-                result = test.run(self.client)
+        host=host,
 
-                if hasattr(result, "duration"):
-                    result.duration = round(
-                        (time.perf_counter() - start) * 1000
-                    )
+        port=port,
 
-                results.append(result)
+        username=username,
 
-            except Exception as ex:
+        password=password
 
-                self.logger.exception(ex)
+    )
 
-                results.append(
 
-                    TestResult(
-                        test_id=test.id,
-                        name=getattr(test, "name", test.id),
-                        status="ERROR",
-                        severity="HIGH",
-                        message=str(ex)
-                    )
+    # ---------------------------------------------------------
+    # Load plugins
+    # ---------------------------------------------------------
 
-                )
+    loader = PluginLoader()
 
-        total_time = round(
-            (time.perf_counter() - scan_start) * 1000
+    tests = loader.load()
+
+
+    logger.info(
+        "Tests loaded: %d",
+        len(tests)
+    )
+
+
+    # ---------------------------------------------------------
+    # Initialize engine
+    # ---------------------------------------------------------
+
+    engine = Engine(
+        client
+    )
+
+
+    for test in tests:
+
+        engine.add_test(
+            test
         )
 
-        self.logger.info("Scan completed in %d ms", total_time)
 
-        return results
+    # ---------------------------------------------------------
+    # Run scan
+    # ---------------------------------------------------------
+
+    results = engine.run()
+
+
+    # ---------------------------------------------------------
+    # Results
+    # ---------------------------------------------------------
+
+    logger.info("=" * 60)
+    logger.info("Scan results")
+    logger.info("=" * 60)
+
+
+    passed = 0
+    failed = 0
+    errors = 0
+
+
+    for result in results:
+
+        logger.info(
+
+            "%s | %s | %s | %s",
+
+            result.test_id,
+
+            result.status,
+
+            result.severity,
+
+            result.message
+
+        )
+
+
+        if result.status == "PASS":
+
+            passed += 1
+
+        elif result.status == "FAIL":
+
+            failed += 1
+
+        elif result.status == "ERROR":
+
+            errors += 1
+
+
+        if result.evidence:
+
+            logger.info(
+
+                "Evidence: %s",
+
+                result.evidence
+
+            )
+
+
+    elapsed = round(
+
+        (time.perf_counter() - scan_start) * 1000
+
+    )
+
+
+    logger.info("=" * 60)
+
+    logger.info(
+
+        "Summary: PASS=%d FAIL=%d ERROR=%d",
+
+        passed,
+
+        failed,
+
+        errors
+
+    )
+
+
+    logger.info(
+
+        "Completed in %d ms",
+
+        elapsed
+
+    )
+
+
+    logger.info("=" * 60)
+
+
+
+if __name__ == "__main__":
+
+    main()
