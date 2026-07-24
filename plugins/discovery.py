@@ -8,7 +8,7 @@ class DiscoveryTest(TestCase):
 
     name = "HTTP Reachability"
 
-    title = "HTTP service availability check"from core.testcase"
+    title = "HTTP service availability check"
 
 class DiscoveryTest(TestCase):
 
