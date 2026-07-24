@@ -2,7 +2,6 @@ import logging
 import time
 
 from core.plugin_loader import PluginLoader
-from core.engine import Engine
 
 
 # ============================================================
