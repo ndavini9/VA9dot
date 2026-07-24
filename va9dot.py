@@ -1,4 +1,3 @@
-import logging
 import time
 
 from core.logger import Logger
@@ -7,22 +6,8 @@ from core.engine import Engine
 from core.httpclient import HttpClient
 
 
-# ============================================================
-# Logging configuration
-# ============================================================
+logger = Logger.get()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)-8s | %(message)s",
-    datefmt="%H:%M:%S"
-)
-
-logger = logging.getLogger(__name__)
-
-
-# ============================================================
-# Main
-# ============================================================
 
 def main():
 
@@ -31,12 +16,47 @@ def main():
     logger.info("=" * 60)
 
 
-    start_time = time.time()
+    scan_start = time.perf_counter()
 
 
-    # --------------------------------------------------------
+    # ========================================================
+    # Target configuration
+    # TODO: move these values into config.yaml
+    # ========================================================
+
+    protocol = "http"
+
+    host = "192.168.1.1"
+
+    port = 80
+
+    username = None
+
+    password = None
+
+
+    # ========================================================
+    # HTTP Client
+    # ========================================================
+
+    client = HttpClient(
+
+        protocol=protocol,
+
+        host=host,
+
+        port=port,
+
+        username=username,
+
+        password=password
+
+    )
+
+
+    # ========================================================
     # Load plugins
-    # --------------------------------------------------------
+    # ========================================================
 
     loader = PluginLoader()
 
@@ -44,116 +64,132 @@ def main():
 
 
     logger.info(
-        "Tests loaded: %s",
+        "Tests loaded: %d",
         len(tests)
     )
 
 
-    if not tests:
+    # ========================================================
+    # Engine
+    # ========================================================
 
-        logger.warning(
-            "No tests available"
+    engine = Engine(
+        client
+    )
+
+
+    for test in tests:
+
+        logger.info(
+            "Adding test: %s",
+            test.id
         )
 
-        return
+        engine.add_test(
+            test
+        )
 
 
-    # --------------------------------------------------------
-    # Execute scan
-    # --------------------------------------------------------
-
-   engine = Engine(
-    client
-    )
-
-
-for test in tests:
-
-    engine.add_test(
-        test
-    )
-
-
-results = engine.run()
-
+    # ========================================================
+    # Run scan
+    # ========================================================
 
     results = engine.run()
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # Results
-    # --------------------------------------------------------
+    # ========================================================
 
     logger.info("=" * 60)
     logger.info("Scan results")
     logger.info("=" * 60)
 
 
+    passed = 0
+    failed = 0
+    errors = 0
+
+
     for result in results:
 
-
         logger.info(
+
             "%s | %s | %s | %s",
+
             result.test_id,
+
             result.status,
+
             result.severity,
+
             result.message
+
         )
 
 
-        if result.evidence:
+        if result.status == "PASS":
+
+            passed += 1
+
+
+        elif result.status == "FAIL":
+
+            failed += 1
+
+
+        elif result.status == "ERROR":
+
+            errors += 1
+
+
+
+        if getattr(
+            result,
+            "evidence",
+            None
+        ):
 
             logger.info(
+
                 "Evidence: %s",
+
                 result.evidence
+
             )
 
 
-    # --------------------------------------------------------
-    # Summary
-    # --------------------------------------------------------
+    elapsed = round(
 
-    elapsed = (
-        time.time()
-        - start_time
-    )
+        (time.perf_counter() - scan_start)
+        * 1000
 
-
-    passed = len(
-        [
-            r for r in results
-            if r.status == "PASS"
-        ]
-    )
-
-    failed = len(
-        [
-            r for r in results
-            if r.status == "FAIL"
-        ]
-    )
-
-    errors = len(
-        [
-            r for r in results
-            if r.status == "ERROR"
-        ]
     )
 
 
     logger.info("=" * 60)
 
     logger.info(
-        "Summary: PASS=%s FAIL=%s ERROR=%s",
+
+        "Summary: PASS=%d FAIL=%d ERROR=%d",
+
         passed,
+
         failed,
+
         errors
+
     )
 
+
     logger.info(
-        "Completed in %.2f seconds",
+
+        "Completed in %d ms",
+
         elapsed
+
     )
+
 
     logger.info("=" * 60)
 
