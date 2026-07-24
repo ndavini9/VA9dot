@@ -6,9 +6,17 @@ class HeaderSecurityTest(TestCase):
 
     id = "HTTP-001"
 
-    title = "Security Headers"
+    name = "Security Headers"
+
+    title = "HTTP Security Headers Configuration"
+
+    category = "WEB"
 
     severity = "MEDIUM"
+
+    cwe = [
+        "CWE-693"
+    ]
 
     recommendation = (
         "Configure missing HTTP security headers."
@@ -17,47 +25,74 @@ class HeaderSecurityTest(TestCase):
 
     required_headers = [
         "X-Frame-Options",
-        "X-Content-Type-Options"
+        "X-Content-Type-Options",
+        "Content-Security-Policy"
     ]
 
 
     def run(self, client):
 
-        result = client.get("/")
+        try:
 
-        response = result["response"]
+            result = client.get("/")
 
-        missing = []
-
-        for header in self.required_headers:
-
-            if header not in response.headers:
-
-                missing.append(header)
+            response = result["response"]
 
 
-        passed = len(missing) == 0
+            existing_headers = [
+                h.lower()
+                for h in response.headers.keys()
+            ]
 
 
-        return TestResult(
+            missing = []
 
-            id=self.id,
+            for header in self.required_headers:
 
-            title=self.title,
+                if header.lower() not in existing_headers:
 
-            severity=self.severity,
+                    missing.append(header)
 
-            passed=passed,
 
-            duration_ms=result["duration_ms"],
+            passed = len(missing) == 0
 
-            message=(
-                "All headers present"
-                if passed
-                else
-                f"Missing: {missing}"
-            ),
 
-            recommendation=self.recommendation
+            return TestResult(
 
-        )
+                id=self.id,
+
+                title=self.title,
+
+                severity=self.severity,
+
+                passed=passed,
+
+                duration_ms=result["duration_ms"],
+
+                message=(
+                    "All headers present"
+                    if passed
+                    else
+                    f"Missing: {missing}"
+                ),
+
+                recommendation=self.recommendation
+
+            )
+
+
+        except Exception as ex:
+
+            return TestResult(
+
+                id=self.id,
+
+                title=self.title,
+
+                severity="INFO",
+
+                passed=False,
+
+                message=str(ex)
+
+            )
