@@ -1,7 +1,10 @@
 import logging
 import time
 
+from core.logger import Logger
 from core.plugin_loader import PluginLoader
+from core.engine import Engine
+from core.http_client import HttpClient
 
 
 # ============================================================
