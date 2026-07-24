@@ -62,9 +62,19 @@ def main():
     # Execute scan
     # --------------------------------------------------------
 
-    engine = Engine(
-        tests
+   engine = Engine(
+    client
     )
+
+
+for test in tests:
+
+    engine.add_test(
+        test
+    )
+
+
+results = engine.run()
 
 
     results = engine.run()
