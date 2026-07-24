@@ -8,9 +8,7 @@ class DiscoveryTest(TestCase):
 
     name = "HTTP Reachability"
 
-    title = "HTTP service availability check"from core.testcase import TestCase
-from core.result import TestResult
-
+    title = "HTTP service availability check"from core.testcase
 
 class DiscoveryTest(TestCase):
 
