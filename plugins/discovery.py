@@ -6,7 +6,11 @@ class DiscoveryTest(TestCase):
 
     id = "DISC-001"
 
-    title = "HTTP Reachability"
+    name = "HTTP Reachability"
+
+    title = "HTTP service availability check"
+
+    category = "DISCOVERY"
 
     severity = "INFO"
 
@@ -32,7 +36,11 @@ class DiscoveryTest(TestCase):
 
                 severity=self.severity,
 
-                passed=response.status_code < 500,
+                status=(
+                    "PASS"
+                    if response.status_code < 500
+                    else "FAIL"
+                ),
 
                 duration_ms=result["duration_ms"],
 
@@ -61,9 +69,9 @@ class DiscoveryTest(TestCase):
 
                 title=self.title,
 
-                severity="CRITICAL",
+                severity="INFO",
 
-                passed=False,
+                status="ERROR",
 
                 message=str(ex),
 
