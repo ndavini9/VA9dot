@@ -24,9 +24,13 @@ class HeaderSecurityTest(TestCase):
 
 
     required_headers = [
+
         "X-Frame-Options",
+
         "X-Content-Type-Options",
+
         "Content-Security-Policy"
+
     ]
 
 
@@ -40,12 +44,16 @@ class HeaderSecurityTest(TestCase):
 
 
             existing_headers = [
-                h.lower()
-                for h in response.headers.keys()
+
+                header.lower()
+
+                for header in response.headers.keys()
+
             ]
 
 
             missing = []
+
 
             for header in self.required_headers:
 
@@ -59,24 +67,47 @@ class HeaderSecurityTest(TestCase):
 
             return TestResult(
 
-                id=self.id,
+                test_id=self.id,
 
-                title=self.title,
+                name=self.name,
+
+                status=(
+                    "PASS"
+                    if passed
+                    else "FAIL"
+                ),
 
                 severity=self.severity,
 
-                passed=passed,
+                category=self.category,
 
                 duration_ms=result["duration_ms"],
 
                 message=(
+
                     "All headers present"
+
                     if passed
+
                     else
+
                     f"Missing: {missing}"
+
                 ),
 
-                recommendation=self.recommendation
+                evidence={
+
+                    "missing_headers": missing,
+
+                    "checked_headers": (
+                        self.required_headers
+                    )
+
+                },
+
+                recommendation=self.recommendation,
+
+                cwe=self.cwe
 
             )
 
@@ -85,14 +116,20 @@ class HeaderSecurityTest(TestCase):
 
             return TestResult(
 
-                id=self.id,
+                test_id=self.id,
 
-                title=self.title,
+                name=self.name,
+
+                status="ERROR",
 
                 severity="INFO",
 
-                passed=False,
+                category=self.category,
 
-                message=str(ex)
+                message=str(ex),
+
+                recommendation=(
+                    "Check HTTP service availability."
+                )
 
             )
