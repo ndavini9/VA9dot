@@ -2,7 +2,7 @@ import time
 
 from core.logger import Logger
 from core.plugin_loader import PluginLoader
-from core.http_client import HttpClient
+from core.httpclient import HttpClient
 
 
 logger = Logger.get()
