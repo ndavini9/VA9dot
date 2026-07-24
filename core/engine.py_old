@@ -1,0 +1,27 @@
+class Engine:
+
+    def __init__(self, client):
+
+        self.client = client
+
+        self.tests = []
+
+        self.results = []
+
+
+    def add_test(self, test):
+
+        self.tests.append(test)
+
+
+    def run(self):
+
+        for test in self.tests:
+
+            print(f"Running {test.id}")
+
+            result = test.run(self.client)
+
+            self.results.append(result)
+
+        return self.results

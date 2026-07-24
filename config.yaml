@@ -1,0 +1,37 @@
+project:
+
+  name: VA9dot
+
+  version: 0.5.0
+
+target:
+
+  protocol: http
+
+  host: 192.168.9.94
+
+  port: 80
+
+authentication:
+
+  username: admin
+
+  password: admin
+
+http:
+
+  timeout: 10
+
+  verify_ssl: false
+
+logging:
+
+  directory: logs
+
+report:
+
+  output: reports
+
+  html: true
+
+  json: true

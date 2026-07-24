@@ -1,0 +1,114 @@
+<html>
+
+<head>
+
+<title>
+VA9dot Security Report
+</title>
+
+<style>
+
+body {
+    font-family: Arial;
+}
+
+.pass {
+    color: green;
+}
+
+.fail {
+    color: red;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>
+VA9dot Security Assessment
+</h1>
+
+
+<p>
+Generated:
+{{ date }}
+</p>
+
+
+<table border="1" cellpadding="5">
+
+
+<tr>
+
+<th>ID</th>
+
+<th>Test</th>
+
+<th>Status</th>
+
+<th>Severity</th>
+
+<th>Message</th>
+
+</tr>
+
+
+{% for r in results %}
+
+<tr>
+
+
+<td>
+{{ r.id }}
+</td>
+
+
+<td>
+{{ r.title }}
+</td>
+
+
+<td>
+
+{% if r.passed %}
+
+<span class="pass">
+PASS
+</span>
+
+{% else %}
+
+<span class="fail">
+FAIL
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+{{ r.severity }}
+</td>
+
+
+<td>
+{{ r.message }}
+</td>
+
+
+</tr>
+
+{% endfor %}
+
+
+</table>
+
+
+</body>
+
+</html>
