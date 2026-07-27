@@ -1,114 +1,113 @@
 <html>
-
 <head>
-
-<title>
-VA9dot Security Report
-</title>
-
+<title>VA9dot Security Report</title>
 <style>
-
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
+    margin: 24px;
+    color: #1e2327;
 }
 
-.pass {
-    color: green;
+h1 {
+    margin-bottom: 4px;
 }
 
-.fail {
-    color: red;
+.meta {
+    color: #666;
+    margin-bottom: 20px;
 }
 
+.summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.summary div {
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+}
+
+.summary .pass { background: #2e7d32; }
+.summary .fail { background: #c62828; }
+.summary .error { background: #ef6c00; }
+.summary .skipped { background: #757575; }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #f4f4f4;
+}
+
+.status-PASS { color: #2e7d32; font-weight: bold; }
+.status-FAIL { color: #c62828; font-weight: bold; }
+.status-ERROR { color: #ef6c00; font-weight: bold; }
+.status-SKIPPED { color: #757575; font-style: italic; }
+
+.sev-HIGH, .sev-CRITICAL { color: #c62828; font-weight: bold; }
+.sev-MEDIUM { color: #ef6c00; font-weight: bold; }
+.sev-LOW { color: #f9a825; }
+.sev-INFO { color: #616161; }
+
+.recommendation {
+    font-size: 0.9em;
+    color: #444;
+}
 </style>
-
 </head>
-
 
 <body>
 
+<h1>VA9dot Security Assessment</h1>
+<p class="meta">Generated: {{ date }}</p>
 
-<h1>
-VA9dot Security Assessment
-</h1>
+<div class="summary">
+    <div class="pass">PASS: {{ summary.PASS }}</div>
+    <div class="fail">FAIL: {{ summary.FAIL }}</div>
+    <div class="error">ERROR: {{ summary.ERROR }}</div>
+    {% if summary.SKIPPED %}
+    <div class="skipped">SKIPPED: {{ summary.SKIPPED }}</div>
+    {% endif %}
+</div>
 
-
-<p>
-Generated:
-{{ date }}
-</p>
-
-
-<table border="1" cellpadding="5">
-
-
+<table>
 <tr>
-
-<th>ID</th>
-
-<th>Test</th>
-
-<th>Status</th>
-
-<th>Severity</th>
-
-<th>Message</th>
-
+    <th>ID</th>
+    <th>Test</th>
+    <th>Category</th>
+    <th>Status</th>
+    <th>Severity</th>
+    <th>Duration (ms)</th>
+    <th>Message</th>
+    <th>Recommendation</th>
 </tr>
-
 
 {% for r in results %}
-
 <tr>
-
-
-<td>
-{{ r.id }}
-</td>
-
-
-<td>
-{{ r.title }}
-</td>
-
-
-<td>
-
-{% if r.passed %}
-
-<span class="pass">
-PASS
-</span>
-
-{% else %}
-
-<span class="fail">
-FAIL
-</span>
-
-{% endif %}
-
-</td>
-
-
-<td>
-{{ r.severity }}
-</td>
-
-
-<td>
-{{ r.message }}
-</td>
-
-
+    <td>{{ r.test_id }}</td>
+    <td>{{ r.name }}</td>
+    <td>{{ r.category }}</td>
+    <td class="status-{{ r.status }}">{{ r.status }}</td>
+    <td class="sev-{{ r.severity }}">{{ r.severity }}</td>
+    <td>{{ r.duration_ms if r.duration_ms is not none else "-" }}</td>
+    <td>{{ r.message }}</td>
+    <td class="recommendation">{{ r.recommendation }}</td>
 </tr>
-
 {% endfor %}
-
 
 </table>
 
-
 </body>
-
 </html>

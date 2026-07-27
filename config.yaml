@@ -1,37 +1,35 @@
 project:
-
   name: VA9dot
-
-  version: 0.5.0
+  version: 0.6.0
 
 target:
-
   protocol: http
-
-  host: 192.168.9.94
-
+  host: 192.168.9.1
   port: 80
 
 authentication:
-
   username: admin
-
   password: admin
 
 http:
-
+  enabled: true
   timeout: 10
-
   verify_ssl: false
 
-logging:
+snmp:
+  enabled: false
+  port: 161
+  version: 2
+  timeout: 2
+  retries: 1
+  # Extra community strings to try, on top of the built-in common list
+  # (public, private, admin, ...) already checked by the SNMP plugins.
+  communities: []
 
+logging:
   directory: logs
 
 report:
-
   output: reports
-
   html: true
-
   json: true

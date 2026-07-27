@@ -35,5 +35,11 @@ class TestCase(ABC):
                 )
 
     @abstractmethod
-    def run(self, client) -> TestResult:
+    def run(self, context) -> TestResult:
+        """
+        context: core.context.ScanContext
+            context.http   -> HttpClient, for web/API tests
+            context.snmp   -> SnmpClient, for SNMP tests
+            context.config -> Config, for test-specific settings
+        """
         pass

@@ -81,3 +81,27 @@ class Config:
     @property
     def logging_directory(self):
         return self.get("logging.directory", "logs")
+
+    @property
+    def http_enabled(self):
+        return self.get("http.enabled", True)
+
+    @property
+    def snmp_enabled(self):
+        return self.get("snmp.enabled", False)
+
+    @property
+    def snmp_port(self):
+        return self.get("snmp.port", 161)
+
+    @property
+    def snmp_version(self):
+        return self.get("snmp.version", 2)
+
+    @property
+    def snmp_timeout(self):
+        return self.get("snmp.timeout", 2)
+
+    @property
+    def snmp_retries(self):
+        return self.get("snmp.retries", 1)

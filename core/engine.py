@@ -6,9 +6,9 @@ from core.result import TestResult
 
 class Engine:
 
-    def __init__(self, client):
+    def __init__(self, context):
 
-        self.client = client
+        self.context = context
         self.tests = []
         self.logger = Logger.get()
 
@@ -55,7 +55,7 @@ class Engine:
             try:
 
                 result = test.run(
-                    self.client
+                    self.context
                 )
 
 

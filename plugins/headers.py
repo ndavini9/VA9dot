@@ -34,11 +34,11 @@ class HeaderSecurityTest(TestCase):
     ]
 
 
-    def run(self, client):
+    def run(self, context):
 
         try:
 
-            result = client.get("/")
+            result = context.http.get("/")
 
             response = result["response"]
 
