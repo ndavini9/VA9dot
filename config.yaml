@@ -1,10 +1,10 @@
 project:
   name: VA9dot
-  version: 0.6.0
+  version: 0.7.0
 
 target:
   protocol: http
-  host: 192.168.9.1
+  host: 192.168.9.94
   port: 80
 
 authentication:
@@ -19,12 +19,42 @@ http:
 snmp:
   enabled: false
   port: 161
+  # Version used by the v1/v2c plugins (SNMP-001, SNMP-002). Irrelevant to
+  # the v3 plugins (SNMP-003, SNMP-004) below, which always speak v3.
   version: 2
   timeout: 2
   retries: 1
-  # Extra community strings to try, on top of the built-in common list
-  # (public, private, admin, ...) already checked by the SNMP plugins.
+
+  # Extra community strings to try (v1/v2c), on top of the built-in
+  # common list already checked (public, private, admin, ...).
   communities: []
+
+  # Extra default usernames to try with noAuthNoPriv (SNMP-003), on top
+  # of the built-in common list (admin, public, initial, root, ...).
+  v3_common_usernames: []
+
+  # Default expected security level for v3_users below, when a given user
+  # doesn't specify its own security_level. One of:
+  #   noAuthNoPriv | authNoPriv | authPriv
+  # Your devices use authNoPriv, so that's the default here - SNMP-004
+  # will only flag a user if it's ALSO reachable at noAuthNoPriv (i.e.
+  # below your declared minimum), not for merely being authNoPriv.
+  v3_default_security_level: authNoPriv
+
+  # Real SNMPv3 USM users provisioned on the device(s), used by SNMP-004
+  # to confirm each one enforces at least its declared security level and
+  # can't be reached at a weaker one.
+  #
+  # auth_protocol: NONE | MD5 | SHA | SHA224 | SHA256 | SHA384 | SHA512
+  # priv_protocol: NONE | DES | 3DES | AES128 | AES192 | AES256
+  # security_level (optional, per user): noAuthNoPriv | authNoPriv | authPriv
+  #   - defaults to v3_default_security_level above if omitted
+  #   - priv_key/priv_protocol aren't needed when security_level is authNoPriv
+  v3_users: []
+  #  - user: monitoring
+  #    auth_key: "changeme_auth_password"
+  #    auth_protocol: SHA
+  #    security_level: authNoPriv
 
 logging:
   directory: logs
